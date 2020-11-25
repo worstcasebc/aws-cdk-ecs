@@ -6,13 +6,11 @@ class ECSBase(core.Construct):
         scope: core.Construct, 
         id: str, 
         cluster_configuration, 
-        autoscaling_spec,
         **kwargs
         ) -> None:
         
         super().__init__(scope, id, **kwargs)
-        self.cluster_configuration = cluster_configuration 
-        self.autoscaling_spec = autoscaling_spec
+        self.cluster_configuration = cluster_configuration  
         
         cluster_vpc = aws_ec2.Vpc(self, "ClusterVPC",
             cidr="10.0.0.0/16", 
@@ -25,11 +23,9 @@ class ECSBase(core.Construct):
             cluster_name=cluster_configuration['cluster_name'],
             vpc=cluster_vpc
         )
-        
-        loadbalancedservice = None
                 
         if self.cluster_configuration['fargate_enabled'] is True:
-            loadbalancedservice = aws_ecs_patterns.ApplicationLoadBalancedFargateService(self, "ECSFargateService",
+            aws_ecs_patterns.ApplicationLoadBalancedFargateService(self, "ECSFargateService",
                 service_name=cluster_configuration['cluster_name']+"Service",
                 cluster=cluster,            # Required
                 cpu=cluster_configuration["container_cpu"],                    # Default is 256
@@ -40,7 +36,7 @@ class ECSBase(core.Construct):
                 memory_limit_mib=cluster_configuration["container_mem"],      # Default is 512
                 public_load_balancer=True)  # Default is False
         else:
-            loadbalancedservice = aws_ecs_patterns.ApplicationLoadBalancedEc2Service(self, "ECSFargateService",
+            aws_ecs_patterns.ApplicationLoadBalancedEc2Service(self, "ECSFargateService",
                 service_name=cluster_configuration['cluster_name']+"Service",
                 cluster=cluster,            # Required
                 cpu=cluster_configuration["container_cpu"],                    # Default is 256
@@ -51,16 +47,3 @@ class ECSBase(core.Construct):
                 memory_limit_mib=cluster_configuration["container_mem"],      # Default is 512
                 public_load_balancer=True)  # Default is False
         
-        if self.autoscaling_spec['enabled']==True:
-        
-            scalableTarget = loadbalancedservice.service.auto_scale_task_count(
-                max_capacity = self.autoscaling_spec['max']
-            );
-            
-            scalableTarget.scale_on_cpu_utilization('CpuScaling', 
-                target_utilization_percent = self.autoscaling_spec['cpu'],
-            );
-            
-            scalableTarget.scale_on_memory_utilization('MemoryScaling', 
-                target_utilization_percent = self.autoscaling_spec['mem'],
-            );

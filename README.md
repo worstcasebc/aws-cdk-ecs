@@ -56,6 +56,16 @@ Fargate enabled: Create a fargate profile on the cluster
 
 `fargate_enabled = True`
 
+Autoscaling
+
+`autoscaling_enabled = True`
+
+`autoscaling_max = 10 # maximum number of instances`
+
+`autoscaling_cpu = 80 # utilization in percent`
+
+`autoscaling_mem = 80 # utilization in percent`
+
 Number of NAT-Gateways for VPC (None|int); None => One NAT gateway/instance per Availability Zone
 
 `vpc_nat_gateways = 1`
