@@ -17,13 +17,17 @@ class AwsCdkEcsStack(core.Stack):
             'cluster_name': self.cluster_name,
             'fargate_enabled': self.fargate_enabled,
             'container_image': self.container_spec["image"],
+            'node_desired': self.autoscaling_spec['node_desired'],
+            'node_max': self.autoscaling_spec['node_max'],
             'container_port': self.container_spec["port"],
-            'container_desired_count': self.container_spec["count"],
             'container_cpu': self.container_spec["cpu"],
             'container_mem': self.container_spec["mem"],
         }
         autoscaling_dict = {
             "enabled": self.autoscaling_spec['enabled'],
+            "instance_type": self.autoscaling_spec['instance_type'],
+            "task_desired": self.autoscaling_spec['task_desired'],
+            "min": self.autoscaling_spec['min'],
             "max": self.autoscaling_spec['max'],
             "cpu": self.autoscaling_spec['cpu'],
             "mem": self.autoscaling_spec['mem'],

@@ -23,28 +23,39 @@ class ECSBase(core.Construct):
         
         cluster = aws_ecs.Cluster(self, "ECSCluster", 
             cluster_name=cluster_configuration['cluster_name'],
-            vpc=cluster_vpc
+            vpc=cluster_vpc,
+            capacity=aws_ecs.AddCapacityOptions(
+                instance_type=aws_ec2.InstanceType(instance_type_identifier=self.autoscaling_spec['instance_type']),
+                min_capacity = 1,
+                max_capacity = self.cluster_configuration['node_max'],
+                desired_capacity = self.cluster_configuration["node_desired"],
+                auto_scaling_group_name = cluster_configuration['cluster_name']+"ASG"
+            )
         )
         
         loadbalancedservice = None
                 
         if self.cluster_configuration['fargate_enabled'] is True:
             loadbalancedservice = aws_ecs_patterns.ApplicationLoadBalancedFargateService(self, "ECSFargateService",
-                service_name=cluster_configuration['cluster_name']+"Service",
+                service_name=self.cluster_configuration['cluster_name']+"Service",
                 cluster=cluster,            # Required
-                cpu=cluster_configuration["container_cpu"],                    # Default is 256
-                desired_count=cluster_configuration["container_desired_count"],
+                cpu=self.cluster_configuration["container_cpu"],                    # Default is 256
+                desired_count=self.autoscaling_spec["task_desired"],
                 task_image_options=aws_ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
                     image=aws_ecs.ContainerImage.from_registry(cluster_configuration["container_image"]),
                     container_port=cluster_configuration["container_port"]),
                 memory_limit_mib=cluster_configuration["container_mem"],      # Default is 512
                 public_load_balancer=True)  # Default is False
+                
         else:
+            # cluster.add_capacity("Capacity",
+            #     instance_type = aws_ec2.InstanceType(instance_type_identifier=self.autoscaling_spec['instance_type']),
+            # )
             loadbalancedservice = aws_ecs_patterns.ApplicationLoadBalancedEc2Service(self, "ECSFargateService",
-                service_name=cluster_configuration['cluster_name']+"Service",
+                service_name=self.cluster_configuration['cluster_name']+"Service",
                 cluster=cluster,            # Required
-                cpu=cluster_configuration["container_cpu"],                    # Default is 256
-                desired_count=cluster_configuration["container_desired_count"],
+                cpu=self.cluster_configuration["container_cpu"],                    # Default is 256
+                desired_count=self.autoscaling_spec["task_desired"],
                 task_image_options=aws_ecs_patterns.ApplicationLoadBalancedTaskImageOptions(
                     image=aws_ecs.ContainerImage.from_registry(cluster_configuration["container_image"]),
                     container_port=cluster_configuration["container_port"]),

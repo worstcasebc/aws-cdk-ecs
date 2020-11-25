@@ -9,10 +9,17 @@ from aws_cdk_ecs.aws_cdk_ecs_stack import AwsCdkEcsStack
 # Cluster name: If none, will autogenerate
 cluster_name = "HandsOnCluster"
 # Fargate enabled: Create a fargate profile on the cluster
-fargate_enabled = True
+fargate_enabled = False
+# If Fargate disabled, which kind of EC2-instances (small|medium|large)
+# NOT YET IMPLEMENTED
+instance_type = "t2.micro"
 # Autoscaling
 autoscaling_enabled = True
-autoscaling_max = 10 # maximum number of instances
+node_desired = 1 # desired number of EC2-instances
+node_max = 10 # maximum number of EC2-instances
+task_desired = 1 # desired number of tasks
+task_min = 1  # maximum number of tasks
+task_max = 10 # maximum number of tasks
 autoscaling_cpu = 80 # utilization in percent
 autoscaling_mem = 80 # utilization in percent
 # Number of NAT-Gateways for VPC (None|int); None => One NAT gateway/instance per Availability Zone
@@ -20,23 +27,26 @@ vpc_nat_gateways = 1
 # Configuration of the container to run
 container_image = "docker.io/worstcaseffm/flaskserver:v1"
 container_port = 5000
-desired_count = 3
-cpu=256
-memory=512
+cpu=256 # means .25 vCPU -> T2.micro = 1vCPU
+memory=256 # -> T2.micro = 1GB
 
 #####################################
 
 container_spec = {
     "image": container_image,
     "port": container_port,
-    "count": desired_count,
     "cpu": cpu,
     "mem": memory,
 }
 
 autoscaling_spec = {
     "enabled": autoscaling_enabled,
-    "max": autoscaling_max,
+    "instance_type": instance_type,
+    "node_desired": node_desired,
+    "node_max": node_max,
+    "task_desired": task_desired,
+    "min": task_min,
+    "max": task_max,
     "cpu": autoscaling_cpu,
     "mem": autoscaling_mem,
 }

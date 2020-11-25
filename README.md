@@ -3,19 +3,25 @@
 
 This is an example of a CDK deployment for an AWS ECS with fargate-profile, running a docker-container, showing the actual hostname and IP-address.
 
-Before you begin check, whether AWS CLI & CDK are installed on your machine:
+Before you begin check, whether AWS CLI is installed on your machine:
+
+`$ aws --version`
+
+If not installed, you need to install it with
 
 ```
-$ aws --version
 $ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
 $ unzip awscliv2.zip
 $ sudo ./aws/install
 ```
 
-If not installed, you need to install it with
+Then check for AWS CDK too 
+
+`$ cdk --version`
+
+and install it if necessary:
 
 ```
-$ cdk --version
 $ npm install --force -g aws-cdk@latest
 ```
 
@@ -60,7 +66,15 @@ Autoscaling
 
 `autoscaling_enabled = True`
 
-`autoscaling_max = 10 # maximum number of instances`
+`node_desired = 1`
+
+`node_max = 10 # maximum number of EC2-instances`
+
+`task_desired = 1 # desired number of tasks`
+
+`task_min = 1  # maximum number of tasks`
+
+`task_max = 10 # maximum number of tasks`
 
 `autoscaling_cpu = 80 # utilization in percent`
 
@@ -76,17 +90,19 @@ Configuration of the container to run
 
 `container_port = 5000`
 
-`desired_count = 3`
+`cpu=256 # means .25 vCPU -> T2.micro = 1vCPU`
 
-To deploy that example t your AWS account run the following cdk-commands:
+`memory=256 # -> T2.micro = 1GB`
+
+To deploy that example to your AWS account run the following cdk-commands:
 
 ```
 $ cdk bootstrap
 $ cdk diff
-$ cdk deploy
+$ cdk deploy --require-approval never
 ```
 
-You may need to confirm the deployment by typing 'y' when asked for.
+You may need to confirm the deployment by typing 'y' when asked for, if not using the parameter --require-approval.
 
 The deployment takes arround 4 min and will output the URL for that service. Check for the container running with that URL in your browser.
 
