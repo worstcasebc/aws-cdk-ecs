@@ -12,25 +12,21 @@ cluster_name = "HandsOnCluster"
 fargate_enabled = True
 # Number of NAT-Gateways for VPC (None|int); None => One NAT gateway/instance per Availability Zone
 vpc_nat_gateways = 1
-# Image of the container to run
+# Configuration of the container to run
 container_image = "docker.io/worstcaseffm/flaskserver:v1"
+container_port = 5000
+desired_count = 3
+cpu=256
+memory=512
 
 #####################################
 
-frontend_service_details = {
-    "service_name": "flask",
-    "replicas": 1,
-    "labels": {
-        "app": "flask",
-    },
+container_spec = {
     "image": container_image,
-    "port": 5000,
-    "service_type": "frontend",
-    # environment variabled not use actually
-    "env": [
-        {"name": "key1", "value": "value1"},
-        {"name": "key2", "value": "value2"},
-    ]
+    "port": container_port,
+    "count": desired_count,
+    "cpu": cpu,
+    "mem": memory,
 }
 
 app = core.App()
@@ -38,7 +34,7 @@ AwsCdkEcsStack(app, "aws-cdk-ecs",
     cluster_name=cluster_name, 
     vpc_nat_gateways=vpc_nat_gateways,
     fargate_enabled=fargate_enabled, 
-    frontend_service=frontend_service_details
+    container_spec=container_spec
 )
 
 app.synth()

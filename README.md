@@ -60,9 +60,13 @@ Number of NAT-Gateways for VPC (None|int); None => One NAT gateway/instance per 
 
 `vpc_nat_gateways = 1`
 
-Image of the container to run
+Configuration of the container to run
 
 `container_image = "docker.io/worstcaseffm/flaskserver:v1"`
+
+`container_port = 5000`
+
+`desired_count = 3`
 
 To deploy that example t your AWS account run the following cdk-commands:
 
@@ -74,7 +78,13 @@ $ cdk deploy
 
 You may need to confirm the deployment by typing 'y' when asked for.
 
-The deployment takes arround 3 min and will output URL for that service. Check for the container running with that DNSName in your browser.
+The deployment takes arround 4 min and will output the URL for that service. Check for the container running with that URL in your browser.
+
+You can adjust the number of running containers by the command
+
+`aws ecs update-service --cluster HandsOnCluster --service HandsOnClusterService --desired-count 1`
+
+`aws ecs list-tasks --cluster HandsOnCluster`
 
 To destroy the whole build use the following command and ensure, you first delete the loadbalancer and the targetgroup and the loadbalancers security-group manually by the CLI or Mnagement Console.
 
